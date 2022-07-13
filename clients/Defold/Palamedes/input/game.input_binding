@@ -14,6 +14,42 @@ key_trigger {
   input: KEY_D
   action: "right"
 }
+key_trigger {
+  input: KEY_UP
+  action: "up"
+}
+key_trigger {
+  input: KEY_DOWN
+  action: "down"
+}
+key_trigger {
+  input: KEY_LEFT
+  action: "left"
+}
+key_trigger {
+  input: KEY_RIGHT
+  action: "right"
+}
+key_trigger {
+  input: KEY_SPACE
+  action: "fire"
+}
+key_trigger {
+  input: KEY_ENTER
+  action: "fire"
+}
+key_trigger {
+  input: KEY_J
+  action: "fire"
+}
+key_trigger {
+  input: KEY_K
+  action: "fire"
+}
+key_trigger {
+  input: KEY_L
+  action: "fire"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_1
   action: "touch"

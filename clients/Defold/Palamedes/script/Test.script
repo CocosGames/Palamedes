@@ -8,10 +8,7 @@ function init(self)
 end
 
 function init_client(self)
-    -- Add initialization code here
     client = ColyseusClient.new("ws://localhost:2567")
-
-    -- join chat room
     client:join_or_create("game", {}, function(err, _room)
         if err then
             print("JOIN ERROR: " .. err)

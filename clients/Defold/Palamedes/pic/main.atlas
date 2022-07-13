@@ -1,5 +1,13 @@
 images {
-  image: "/raw/ref.png"
+  image: "/raw/bg.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/raw/box.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/raw/character/akuma.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 margin: 0

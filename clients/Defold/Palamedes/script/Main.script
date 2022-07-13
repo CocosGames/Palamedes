@@ -1,0 +1,54 @@
+local cc = require "script/CClient"
+
+function init(self)
+    cc.init()
+    msg.post(".", "acquire_input_focus")
+end
+
+function test_callback()
+    print("test ok.")
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("on_gesture") then
+		if message.swipe_right then
+			print(message.swipe.from, message.swipe.to)
+		elseif message.tap then
+			print(message.tap.position)
+		elseif message.double_tap then
+			print(message.double_tap.position)
+		elseif message.long_press then
+			print(g.long_press.position, message.long_press.time)
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+    if action_id == hash("left") then
+        if action.released then
+
+        end
+    elseif action_id == hash("right") then
+        if action.released then
+            cc.send("move", {dir="r"})
+        end
+    end
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end
