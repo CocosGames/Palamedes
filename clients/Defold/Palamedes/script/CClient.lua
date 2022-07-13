@@ -1,10 +1,11 @@
 local M = {}
+M.id = "id"
 
 local ColyseusClient = require "colyseus.client"
 local client
 local room
 
-function M.init()
+function M.init(callback)
     client = ColyseusClient.new("ws://localhost:2567")
     client:join_or_create("game", {}, function(err, _room)
         if err then
@@ -13,9 +14,8 @@ function M.init()
         end
 
         room = _room
-        room:on("statechange", function(state)
-            pprint("new state:", state)
-        end)
+        M.id = _room.sessionId;
+        room:on("statechange", callback)
     end)
 end
 

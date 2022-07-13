@@ -32,23 +32,23 @@ key_trigger {
 }
 key_trigger {
   input: KEY_SPACE
-  action: "fire"
+  action: "roll"
 }
 key_trigger {
   input: KEY_ENTER
-  action: "fire"
+  action: "roll"
 }
 key_trigger {
   input: KEY_J
-  action: "fire"
+  action: "roll"
 }
 key_trigger {
   input: KEY_K
-  action: "fire"
+  action: "roll"
 }
 key_trigger {
   input: KEY_L
-  action: "fire"
+  action: "roll"
 }
 mouse_trigger {
   input: MOUSE_BUTTON_1
