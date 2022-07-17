@@ -7,6 +7,7 @@ local room
 
 function M.init(callback)
     client = ColyseusClient.new("ws://localhost:2567")
+    --client = ColyseusClient.new("https://cyan-weary-angelfish.cyclic.app/")
     client:join_or_create("game", {}, function(err, _room)
         if err then
             print("JOIN ERROR: " .. err)
