@@ -17,3 +17,6 @@ dependencies#0 = https://github.com/colyseus/colyseus-defold/archive/refs/tags/0
 dependencies#1 = https://github.com/defold/extension-websocket/archive/refs/tags/3.1.0.zip
 dependencies#2 = https://github.com/britzl/defold-input/archive/refs/tags/4.3.0.zip
 
+[sprite]
+max_count = 256
+

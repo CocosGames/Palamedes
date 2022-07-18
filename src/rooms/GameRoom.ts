@@ -3,6 +3,13 @@ import {GameState, Player} from "./schema/GameState";
 
 export class GameRoom extends Room<GameState> {
 
+    public static DROP_TIMEOUT = 10;
+    public static  BOARD_WIDTH = 6;
+    public static  BOARD_HEIGHT = 9;
+    public static  PLAYER_NUM = 2;
+    public static  INIT_LINES = 9;
+    public static  DICE_NUM = 6; // 1~6
+
     onCreate(options: any) {
         this.setState(new GameState());
 
