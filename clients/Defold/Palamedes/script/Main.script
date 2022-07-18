@@ -5,6 +5,8 @@ local box_z = 0.3
 local position = 1 --1~6
 local p1_startX = 137
 local p1_startY = 130
+local p1_dice = 1 --1~6
+local p1_box = nil
 
 function init(self)
     cc.init(on_state_change)
@@ -17,6 +19,10 @@ function on_state_change(state)
     if newstate.pos ~= position then
         position = newstate.pos
         go.animate("/p1", "position.x", go.PLAYBACK_ONCE_FORWARD, p1_startX + position * box_size, go.EASING_LINEAR, 0.1)
+    end
+    if newstate.dice ~= p1_dice then
+        p1_dice = newstate.dice
+        msg.post("/dice1#sprite", "play_animation", { id = hash(newstate.dice) })
     end
 end
 
@@ -59,7 +65,12 @@ function on_input(self, action_id, action)
         elseif action_id == hash("up") then
             --
             local p = vmath.vector3(p1_startX + position * box_size, p1_startY+box_size, box_z)
-            factory.create("/box#factory", p)
+            p1_box = factory.create("/box#factory", p)
+            msg.post(msg.url(nil,p1_box,"sprite"), "play_animation", { id = hash(p1_dice) })
+        end
+
+        if action_id == hash("roll") then
+            cc.send("roll")
         end
     end
 

@@ -13,7 +13,7 @@ function final(self)
 end
 
 function update(self, dt)
-	go.set_position(go.get_position()+vmath.vector3(0,5,0),".")
+	go.set_position(go.get_position()+vmath.vector3(0,8,0),".")
 	if go.get_position().y>=top then
 		go.delete()
 	end

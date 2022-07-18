@@ -5,7 +5,7 @@ function init(self)
 	-- Learn more: https://defold.com/manuals/script/
 	-- Remove this function if not needed
 
-    msg.post("#sprite", "play_animation", { id = hash("2") })
+    --msg.post("#sprite", "play_animation", { id = hash("2") })
 end
 
 function final(self)

@@ -7,13 +7,24 @@ export class GameRoom extends Room<GameState> {
         this.setState(new GameState());
 
         this.onMessage("move", (client, message) => {
-            console.log("message move received:" + message.dir);
-            if (message.dir == "l") {
-                this.state.players.get(client.sessionId).pos--;
-            } else if (message.dir == "r") {
-                this.state.players.get(client.sessionId).pos++;
+                console.log("message move received:" + message.dir);
+                if (message.dir == "l") {
+                    this.state.players.get(client.sessionId).pos--;
+                } else if (message.dir == "r") {
+                    this.state.players.get(client.sessionId).pos++;
+                }
             }
-        });
+        );
+
+        this.onMessage("roll", (client, message) => {
+                console.log("message roll recelived.")
+                if (this.state.players.get(client.sessionId).dice==6) {
+                    this.state.players.get(client.sessionId).dice = 1
+                } else {
+                    this.state.players.get(client.sessionId).dice++;
+                }
+            }
+        );
 
     }
 
