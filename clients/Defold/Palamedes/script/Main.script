@@ -15,7 +15,6 @@ local p1_box = "/box1"
 local p1_board = {}
 local p1_shooting = false
 -- 判断所触及网格有无数字, 如果数字与 p1_dice 相同, send 消除消息. 服务器消除数字, 消除空行, 超时多加一行. 达到十行分胜负.
---xy->uv: u=(x-startx)%box_size; v=board_height-(y-starty)/box_size; index = v*board_width+u; if board[index] >0 boom(); if u<0 boom(); if p1_dice==board[index] sendMessage();
 --一个有效input之后要禁止输入, 对应动画效果播放完毕之后才允许输入; 最后加入p2, 合并p1p2功能
 function init(self)
     cc.init(on_state_change)
@@ -72,7 +71,7 @@ function update(self, dt)
             local n = go.get(msg.url(nil,p1_board[p1i],"sprite"),"animation")
             if n==hash(p1_dice) then
                 msg.post(msg.url(nil, p1_board[p1i], "sprite"), "play_animation", { id = hash("boom") })
-                cc.send("u")
+                cc.send("shoot", {i = p1i})
             end
             msg.post(p1_box, "disable")
             p1_shooting = false
@@ -80,8 +79,10 @@ function update(self, dt)
 
         p1_box_pos = go.get_position(p1_box)+ vmath.vector3(0, box_speed, 0);
         go.set_position(p1_box_pos, p1_box)
-
-        -- if board[index] >0 boom(); if u<0 boom(); if p1_dice==board[index] sendMessage();
+        if p1v <= 0 then
+            msg.post(p1_box, "disable")
+            p1_shooting = false
+        end
     end
 
 end
