@@ -3,16 +3,23 @@ local cc = require "script/CClient"
 local box_size = 46
 local box_z = 0.3
 local board_width = 6
-local board_height = 9
+local board_height = 10
+local move_speed = 10
+local box_speed = 10
+
 local p1_pos = 1 --1~6
 local p1_startX = 140
 local p1_startY = 138
 local p1_dice = 1 --1~6
-local p1_box = nil
+local p1_box = "/box1"
 local p1_board = {}
-
+local p1_shooting = false
+-- 判断所触及网格有无数字, 如果数字与 p1_dice 相同, send 消除消息. 服务器消除数字, 消除空行, 超时多加一行. 达到十行分胜负.
+--xy->uv: u=(x-startx)%box_size; v=board_height-(y-starty)/box_size; index = v*board_width+u; if board[index] >0 boom(); if u<0 boom(); if p1_dice==board[index] sendMessage();
+--一个有效input之后要禁止输入, 对应动画效果播放完毕之后才允许输入; 最后加入p2, 合并p1p2功能
 function init(self)
     cc.init(on_state_change)
+    msg.post(p1_box, "disable")
     msg.post(".", "acquire_input_focus")
 end
 
@@ -21,7 +28,7 @@ function on_state_change(state)
     update_board(newstate.board)
     if newstate.pos ~= p1_pos then
         p1_pos = newstate.pos
-        go.animate("/p1", "position.x", go.PLAYBACK_ONCE_FORWARD, p1_startX + p1_pos * box_size, go.EASING_LINEAR, 0.1)
+        go.animate("/p1", "position.x", go.PLAYBACK_ONCE_FORWARD, p1_startX + p1_pos * box_size, go.EASING_LINEAR, 1 / move_speed)
     end
     if newstate.dice ~= p1_dice then
         p1_dice = newstate.dice
@@ -32,15 +39,15 @@ end
 function update_board(b)
     go.delete(p1_board)
     p1_board = {}
-    print("how many: " .. #b.items)
     for i, v in ipairs(b.items) do
         local px = p1_startX + ((i - 1) % board_width + 1) * box_size;
-        local py = p1_startY + (board_height - math.floor((i - 1) / board_width)) * box_size;
-
-        local p = vmath.vector3(px, py, box_z + 0.1)
-        local piece = factory.create("/board#factory", p)
-        msg.post(msg.url(nil, piece, "sprite"), "play_animation", { id = hash(v) })
-        p1_board[i] = piece
+        local py = p1_startY + (board_height - math.floor((i - 1) / board_width) - 1) * box_size;
+        if v>0 then
+            local p = vmath.vector3(px, py, box_z)
+            local piece = factory.create("/board#factory", p)
+            msg.post(msg.url(nil, piece, "sprite"), "play_animation", { id = hash(v) })
+            p1_board[i] = piece
+        end
     end
 
 end
@@ -56,9 +63,27 @@ function final(self)
 end
 
 function update(self, dt)
-    -- Add update code here
-    -- Learn more: https://defold.com/manuals/script/
-    -- Remove this function if not needed
+    if p1_shooting then
+        local p1_box_pos = go.get_position(p1_box)
+        local p1u = math.ceil((p1_box_pos.x - p1_startX) / box_size)
+        local p1v = board_height - math.ceil((p1_box_pos.y - p1_startY) / box_size)
+        local p1i = (p1v-1) * board_width + p1u
+        if p1_board[p1i]~=nil then
+            local n = go.get(msg.url(nil,p1_board[p1i],"sprite"),"animation")
+            if n==hash(p1_dice) then
+                msg.post(msg.url(nil, p1_board[p1i], "sprite"), "play_animation", { id = hash("boom") })
+                cc.send("u")
+            end
+            msg.post(p1_box, "disable")
+            p1_shooting = false
+        end
+
+        p1_box_pos = go.get_position(p1_box)+ vmath.vector3(0, box_speed, 0);
+        go.set_position(p1_box_pos, p1_box)
+
+        -- if board[index] >0 boom(); if u<0 boom(); if p1_dice==board[index] sendMessage();
+    end
+
 end
 
 function on_message(self, message_id, message, sender)
@@ -72,6 +97,7 @@ function on_message(self, message_id, message, sender)
         elseif message.long_press then
             print(g.long_press.position, message.long_press.time)
         end
+
     end
 end
 
@@ -82,10 +108,11 @@ function on_input(self, action_id, action)
         elseif action_id == hash("right") then
             cc.send("move", { dir = "r" })
         elseif action_id == hash("up") then
-            --
-            local p = vmath.vector3(p1_startX + p1_pos * box_size, p1_startY + box_size, box_z)
-            p1_box = factory.create("/box#factory", p)
+            local p = vmath.vector3(p1_startX + p1_pos * box_size, p1_startY, box_z)
+            go.set_position(p, p1_box)
             msg.post(msg.url(nil, p1_box, "sprite"), "play_animation", { id = hash(p1_dice) })
+            msg.post(p1_box, "enable")
+            p1_shooting = true
         end
 
         if action_id == hash("roll") then
