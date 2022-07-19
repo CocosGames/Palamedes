@@ -1,5 +1,6 @@
 import {Room, Client} from "colyseus";
 import {GameState, Player} from "./schema/GameState";
+import {ArraySchema} from "@colyseus/schema";
 
 export class GameRoom extends Room<GameState> {
 
@@ -37,21 +38,40 @@ export class GameRoom extends Room<GameState> {
                 console.log("message shoot recelived: " + message.i);
                 // this.state.players.get(client.sessionId).board[message.i-1] = 0;
                 let col = [];
-                for (var n = this.state.players.get(client.sessionId).pos-1; n < GameRoom.BOARD_WIDTH * GameRoom.BOARD_HEIGHT; n += GameRoom.BOARD_WIDTH) {
+                let clean = true;
+                for (var n = this.state.players.get(client.sessionId).pos - 1; n < GameRoom.BOARD_WIDTH * GameRoom.BOARD_HEIGHT; n += GameRoom.BOARD_WIDTH) {
                     col.push(n);
                 }
                 col = col.reverse();
                 for (var m = 0; m < col.length; m++) {
-                    if (this.state.players.get(client.sessionId).board[col[m]]==0 || this.state.players.get(client.sessionId).board[col[m]]==null)
+                    if (this.state.players.get(client.sessionId).board[col[m]] == 0 || this.state.players.get(client.sessionId).board[col[m]] == null)
                         continue;
-                    if (this.state.players.get(client.sessionId).board[col[m]]==this.state.players.get(client.sessionId).dice && col[m]==message.i-1) {
+                    if (this.state.players.get(client.sessionId).board[col[m]] == this.state.players.get(client.sessionId).dice && col[m] == message.i - 1) {
                         this.state.players.get(client.sessionId).board[col[m]] = 0;
+                        clean = false;
                     }
                     break;
                 }
-
+                if (!clean) {
+                    let removeZeros = true;
+                    let board =  this.state.players.get(client.sessionId).board;
+                    for (var l =board.length - 1; l >= board.length - GameRoom.BOARD_WIDTH; l--) {
+                        if (board[l] != 0) {
+                            removeZeros = false;
+                            break;
+                        }
+                    }
+                    if (removeZeros)
+                        this.removeLines(client, 1);
+                }
             }
         );
+    }
+
+    removeLines(c: Client, l: number = 1) {
+        let b = this.state.players.get(c.sessionId).board;
+        this.state.players.get(c.sessionId).board = b.slice(0, b.length - l * GameRoom.BOARD_WIDTH);
+        console.log(l + " lines removed!");
     }
 
     onJoin(client: Client, options: any) {
