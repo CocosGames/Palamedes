@@ -1,6 +1,6 @@
 import {Room, Client} from "colyseus";
 import {GameState, Player} from "./schema/GameState";
-import {ArraySchema} from "@colyseus/schema";
+import {ArraySchema, MapSchema} from "@colyseus/schema";
 
 export class GameRoom extends Room<GameState> {
 
@@ -17,7 +17,7 @@ export class GameRoom extends Room<GameState> {
             this.clients.forEach((c, i, a) => {
                 this.addLines(c);
             });
-        }, GameRoom.DROP_TIMEOUT*1000);
+        }, GameRoom.DROP_TIMEOUT * 1000);
         this.onMessage("move", (client, message) => {
                 console.log("message move received: " + message.dir);
                 if (message.dir == "l") {
@@ -47,15 +47,18 @@ export class GameRoom extends Room<GameState> {
                     col.push(n);
                 }
                 col = col.reverse();
+                let b = this.state.players.get(client.sessionId).board;
                 for (var m = 0; m < col.length; m++) {
-                    if (this.state.players.get(client.sessionId).board[col[m]] == 0 || this.state.players.get(client.sessionId).board[col[m]] == null)
+                    if (b[col[m]] == 0 || b[col[m]] == null)
                         continue;
-                    if (this.state.players.get(client.sessionId).board[col[m]] == this.state.players.get(client.sessionId).dice && col[m] == message.i - 1) {
+                    if (b[col[m]] == this.state.players.get(client.sessionId).dice && col[m] == message.i - 1) {
                         this.state.players.get(client.sessionId).board[col[m]] = 0;
-                        this.state.players.get(client.sessionId).history.push(this.state.players.get(client.sessionId).dice);
-                        if (this.state.players.get(client.sessionId).history.length > GameRoom.BOARD_WIDTH)
-                            // this.state.players.get(client.sessionId).history.shift();
-                            this.state.players.get(client.sessionId).history = this.state.players.get(client.sessionId).history.slice(this.state.players.get(client.sessionId).history.length - GameRoom.BOARD_WIDTH, this.state.players.get(client.sessionId).history.length);
+                        let h = this.state.players.get(client.sessionId).history.toJSON();
+                        if (h.length >= GameRoom.BOARD_WIDTH)
+                             h.shift();
+                        h.push(this.state.players.get(client.sessionId).dice)
+                        this.state.players.get(client.sessionId).history = new ArraySchema<number>().concat(h);
+                        // this.state.players.get(client.sessionId).history = h.slice(h.length - GameRoom.BOARD_WIDTH, this.state.players.get(client.sessionId).history.length);
                         clean = false;
                     }
                     break;
@@ -78,20 +81,21 @@ export class GameRoom extends Room<GameState> {
 
     removeLines(c: Client, l: number = 1) {
         let b = this.state.players.get(c.sessionId).board;
-        this.state.players.get(c.sessionId).board = b.slice(0, b.length - l * GameRoom.BOARD_WIDTH);
+        this.state.players.get(c.sessionId).board = b.slice(0, b.length - l * GameRoom.BOARD_WIDTH) as ArraySchema<number>;
         console.log(l + " lines removed!");
     }
 
     addLines(c: Client, l: number = 1) {
-        let b = this.state.players.get(c.sessionId).board as ArraySchema<number>;
+        let b = this.state.players.get(c.sessionId).board;
         for (var i = 0; i < l; i++) {
-            let line = [];
+            let line: ArraySchema<number> = new ArraySchema<number>();
             for (var j = 0; j < GameRoom.BOARD_WIDTH; j++) {
                 line.push(Math.ceil(Math.random() * GameRoom.DICE_NUM));
             }
-            for (var k = line.length-1; k >= 0; k--) {
-                this.state.players.get(c.sessionId).board.unshift(line[k]);
-            }
+            this.state.players.get(c.sessionId).board = line.concat(b.toJSON());
+            // for (var k = line.length-1; k >= 0; k--) {
+            //     this.state.players.get(c.sessionId).board.unshift(line[k]);
+            // }
         }
     }
 

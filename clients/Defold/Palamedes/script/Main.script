@@ -5,7 +5,7 @@ local box_z = 0.3
 local board_width = 6
 local board_height = 10
 local move_speed = 10
-local box_speed = 10
+local box_speed = 12
 
 local p1_pos = 1 --1~6
 local p1_startX = 140
@@ -17,7 +17,9 @@ local p1_box = "/box1"
 local p1_board = {}
 local p1_history = {}
 local p1_shooting = false
--- 达到十行分胜负. 清理代码
+
+
+-- 位置边界判定, 达到十行分胜负. 清理代码
 --一个有效input之后要禁止输入, 对应动画效果播放完毕之后才允许输入; 最后加入p2, 合并p1p2功能
 function init(self)
     cc.init(on_state_change)
@@ -125,11 +127,13 @@ function on_input(self, action_id, action)
         elseif action_id == hash("right") then
             cc.send("move", { dir = "r" })
         elseif action_id == hash("up") then
-            local p = vmath.vector3(p1_startX + p1_pos * box_size, p1_startY, box_z)
-            go.set_position(p, p1_box)
-            msg.post(msg.url(nil, p1_box, "sprite"), "play_animation", { id = hash(p1_dice) })
-            msg.post(p1_box, "enable")
-            p1_shooting = true
+            if p1_shooting == false then
+                local p = vmath.vector3(p1_startX + p1_pos * box_size, p1_startY, box_z)
+                go.set_position(p, p1_box)
+                msg.post(msg.url(nil, p1_box, "sprite"), "play_animation", { id = hash(p1_dice) })
+                msg.post(p1_box, "enable")
+                p1_shooting = true
+            end
         end
 
         if action_id == hash("roll") then
