@@ -21,9 +21,11 @@ export class GameRoom extends Room<GameState> {
         this.onMessage("move", (client, message) => {
                 console.log("message move received: " + message.dir);
                 if (message.dir == "l") {
-                    this.state.players.get(client.sessionId).pos--;
+                    if (this.state.players.get(client.sessionId).pos > 1)
+                        this.state.players.get(client.sessionId).pos--;
                 } else if (message.dir == "r") {
-                    this.state.players.get(client.sessionId).pos++;
+                    if (this.state.players.get(client.sessionId).pos < GameRoom.BOARD_WIDTH)
+                        this.state.players.get(client.sessionId).pos++;
                 }
             }
         );
@@ -55,7 +57,7 @@ export class GameRoom extends Room<GameState> {
                         this.state.players.get(client.sessionId).board[col[m]] = 0;
                         let h = this.state.players.get(client.sessionId).history.toJSON();
                         if (h.length >= GameRoom.BOARD_WIDTH)
-                             h.shift();
+                            h.shift();
                         h.push(this.state.players.get(client.sessionId).dice)
                         this.state.players.get(client.sessionId).history = new ArraySchema<number>().concat(h);
                         // this.state.players.get(client.sessionId).history = h.slice(h.length - GameRoom.BOARD_WIDTH, this.state.players.get(client.sessionId).history.length);
