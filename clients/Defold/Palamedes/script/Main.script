@@ -10,11 +10,14 @@ local box_speed = 10
 local p1_pos = 1 --1~6
 local p1_startX = 140
 local p1_startY = 138
+local p1_historyX = 140
+local p1_historyY = 45
 local p1_dice = 1 --1~6
 local p1_box = "/box1"
 local p1_board = {}
+local p1_history = {}
 local p1_shooting = false
--- 判断所触及网格有无数字, 如果数字与 p1_dice 相同, send 消除消息. 服务器消除数字, 消除空行, 超时多加一行. 达到十行分胜负.
+-- 达到十行分胜负. 清理代码
 --一个有效input之后要禁止输入, 对应动画效果播放完毕之后才允许输入; 最后加入p2, 合并p1p2功能
 function init(self)
     cc.init(on_state_change)
@@ -25,6 +28,7 @@ end
 function on_state_change(state)
     local newstate = state.players[cc.id];
     update_board(newstate.board)
+    update_history(newstate.history)
     if newstate.pos ~= p1_pos then
         p1_pos = newstate.pos
         go.animate("/p1", "position.x", go.PLAYBACK_ONCE_FORWARD, p1_startX + p1_pos * box_size, go.EASING_LINEAR, 1 / move_speed)
@@ -41,14 +45,26 @@ function update_board(b)
     for i, v in ipairs(b.items) do
         local px = p1_startX + ((i - 1) % board_width + 1) * box_size;
         local py = p1_startY + (board_height - math.floor((i - 1) / board_width) - 1) * box_size;
-        if v>0 then
+        if v > 0 then
             local p = vmath.vector3(px, py, box_z)
             local piece = factory.create("/board#factory", p)
             msg.post(msg.url(nil, piece, "sprite"), "play_animation", { id = hash(v) })
             p1_board[i] = piece
         end
     end
+end
 
+function update_history(h)
+    go.delete(p1_history)
+    p1_history = {}
+    local empty = (board_width - #h.items) * box_size
+    for i, v in ipairs(h.items) do
+        local px = empty + p1_historyX + ((i - 1) % board_width + 1) * box_size;
+        local p = vmath.vector3(px, p1_historyY, box_z)
+        local piece = factory.create("/board#factory", p)
+        msg.post(msg.url(nil, piece, "sprite"), "play_animation", { id = hash(v) })
+        p1_history[i] = piece
+    end
 end
 
 function test_callback()
@@ -66,18 +82,18 @@ function update(self, dt)
         local p1_box_pos = go.get_position(p1_box)
         local p1u = math.ceil((p1_box_pos.x - p1_startX) / box_size)
         local p1v = board_height - math.ceil((p1_box_pos.y - p1_startY) / box_size)
-        local p1i = (p1v-1) * board_width + p1u
-        if p1_board[p1i]~=nil then
-            local n = go.get(msg.url(nil,p1_board[p1i],"sprite"),"animation")
-            if n==hash(p1_dice) then
+        local p1i = (p1v - 1) * board_width + p1u
+        if p1_board[p1i] ~= nil then
+            local n = go.get(msg.url(nil, p1_board[p1i], "sprite"), "animation")
+            if n == hash(p1_dice) then
                 msg.post(msg.url(nil, p1_board[p1i], "sprite"), "play_animation", { id = hash("boom") })
-                cc.send("shoot", {i = p1i})
+                cc.send("shoot", { i = p1i })
             end
             msg.post(p1_box, "disable")
             p1_shooting = false
         end
 
-        p1_box_pos = go.get_position(p1_box)+ vmath.vector3(0, box_speed, 0);
+        p1_box_pos = go.get_position(p1_box) + vmath.vector3(0, box_speed, 0);
         go.set_position(p1_box_pos, p1_box)
         if p1v <= 0 then
             msg.post(p1_box, "disable")

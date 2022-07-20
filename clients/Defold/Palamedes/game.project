@@ -20,3 +20,6 @@ dependencies#2 = https://github.com/britzl/defold-input/archive/refs/tags/4.3.0.
 [sprite]
 max_count = 256
 
+[native_extension]
+app_manifest = /generated.appmanifest
+

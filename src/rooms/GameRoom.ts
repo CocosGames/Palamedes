@@ -13,7 +13,11 @@ export class GameRoom extends Room<GameState> {
 
     onCreate(options: any) {
         this.setState(new GameState());
-
+        this.clock.setInterval(() => {
+            this.clients.forEach((c, i, a) => {
+                this.addLines(c);
+            });
+        }, GameRoom.DROP_TIMEOUT*1000);
         this.onMessage("move", (client, message) => {
                 console.log("message move received: " + message.dir);
                 if (message.dir == "l") {
@@ -48,14 +52,18 @@ export class GameRoom extends Room<GameState> {
                         continue;
                     if (this.state.players.get(client.sessionId).board[col[m]] == this.state.players.get(client.sessionId).dice && col[m] == message.i - 1) {
                         this.state.players.get(client.sessionId).board[col[m]] = 0;
+                        this.state.players.get(client.sessionId).history.push(this.state.players.get(client.sessionId).dice);
+                        if (this.state.players.get(client.sessionId).history.length > GameRoom.BOARD_WIDTH)
+                            // this.state.players.get(client.sessionId).history.shift();
+                            this.state.players.get(client.sessionId).history = this.state.players.get(client.sessionId).history.slice(this.state.players.get(client.sessionId).history.length - GameRoom.BOARD_WIDTH, this.state.players.get(client.sessionId).history.length);
                         clean = false;
                     }
                     break;
                 }
                 if (!clean) {
                     let removeZeros = true;
-                    let board =  this.state.players.get(client.sessionId).board;
-                    for (var l =board.length - 1; l >= board.length - GameRoom.BOARD_WIDTH; l--) {
+                    let board = this.state.players.get(client.sessionId).board;
+                    for (var l = board.length - 1; l >= board.length - GameRoom.BOARD_WIDTH; l--) {
                         if (board[l] != 0) {
                             removeZeros = false;
                             break;
@@ -74,6 +82,19 @@ export class GameRoom extends Room<GameState> {
         console.log(l + " lines removed!");
     }
 
+    addLines(c: Client, l: number = 1) {
+        let b = this.state.players.get(c.sessionId).board as ArraySchema<number>;
+        for (var i = 0; i < l; i++) {
+            let line = [];
+            for (var j = 0; j < GameRoom.BOARD_WIDTH; j++) {
+                line.push(Math.ceil(Math.random() * GameRoom.DICE_NUM));
+            }
+            for (var k = line.length-1; k >= 0; k--) {
+                this.state.players.get(c.sessionId).board.unshift(line[k]);
+            }
+        }
+    }
+
     onJoin(client: Client, options: any) {
         console.log(client.sessionId, "joined!");
         this.state.players.set(client.sessionId, new Player());
@@ -86,5 +107,4 @@ export class GameRoom extends Room<GameState> {
     onDispose() {
         console.log("room", this.roomId, "disposing...");
     }
-
 }
