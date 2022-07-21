@@ -4,7 +4,8 @@ import {ArraySchema, MapSchema} from "@colyseus/schema";
 
 export class GameRoom extends Room<GameState> {
 
-    public static DROP_TIMEOUT = 10;
+    public static DROP_TIMEOUT = 8;
+    public static MAGIC_TIMEOUT = 2;
     public static BOARD_WIDTH = 6;
     public static BOARD_HEIGHT = 10;
     public static PLAYER_NUM = 2;
@@ -85,6 +86,10 @@ export class GameRoom extends Room<GameState> {
             console.log("message magic recelived.");
             let lr = this.patternMagic(this.state.players.get(client.sessionId).history.toJSON());
             if (lr > 0) {
+                this.state.players.get(client.sessionId).magic = lr;
+                this.clock.setTimeout(() => {
+                    this.state.players.get(client.sessionId).magic = 0;
+                }, GameRoom.MAGIC_TIMEOUT * 1000);
                 this.state.players.get(client.sessionId).history = new ArraySchema<number>();
                 this.removeLines(client, lr);
             }
