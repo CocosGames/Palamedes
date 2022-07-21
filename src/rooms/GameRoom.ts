@@ -18,6 +18,7 @@ export class GameRoom extends Room<GameState> {
                 this.addLines(c);
             });
         }, GameRoom.DROP_TIMEOUT * 1000);
+
         this.onMessage("move", (client, message) => {
                 console.log("message move received: " + message.dir);
                 if (message.dir == "l") {
@@ -79,10 +80,44 @@ export class GameRoom extends Room<GameState> {
                 }
             }
         );
+
+        this.onMessage("magic", (client, message) => {
+            /*
+            PATTERNS "What have you done makes what are you today."
+
+            pattern 6
+            123456 654321
+            111111 222222 333333 444444 555555 666666
+            4 lines
+
+            pattern 6'
+            xyxyxy xyzxyz
+            3 lines
+
+            pattern 5
+            12345x 23456x 65432x 54321x x12345 x23456 x65432 x54321
+            11111x x11111 22222x x22222 33333x x33333 44444x x44444 55555x x55555 66666x x66666
+            3 lines
+
+            pattern 4
+            1234xx 2345xx 3456xx 6543xx 5432xx 4321xx xx1234 xx2345 xx3456 xx4321 xx5432 xx6543
+            1111xx xx1111 2222xx xx2222 3333xx xx3333 4444xx xx4444 5555xx xx5555 6666xx xx6666
+            2 lines
+
+            pattern 3
+            123xxx 234xxx 345xxx 456xxx 654xxx 543xxx 432xxx 321xxx
+            xxx123 xxx234 xxx345 xxx456 xxx654 xxx543 xxx432 xxx321
+            xxx111 111xxx xxx222 222xxx xxx333 333xxx xxx444 444xxx xxx555 555xxx xxx666 666xxx
+            1 line
+            */
+        });
     }
 
     removeLines(c: Client, l: number = 1) {
         let b = this.state.players.get(c.sessionId).board;
+        let bl = Math.ceil(b.length / GameRoom.BOARD_WIDTH);
+        if (l > bl)
+            l = bl;
         this.state.players.get(c.sessionId).board = b.slice(0, b.length - l * GameRoom.BOARD_WIDTH) as ArraySchema<number>;
         console.log(l + " lines removed!");
     }

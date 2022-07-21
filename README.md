@@ -2,6 +2,8 @@
 
 https://www.youtube.com/watch?v=dlKRhjqefPU
 
+https://forum.defold.com/t/palamedes-online/71266
+
 ## 介绍
 
 本项目是开源游戏 Palamedes Online 的代码库, 包括服务端与客户端所有代码.
