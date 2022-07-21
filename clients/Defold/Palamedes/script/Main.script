@@ -19,7 +19,7 @@ local p1_history = {}
 local p1_shooting = false
 
 
--- 达到十行分胜负. 清理代码
+-- 达到十行分胜负. 加入手势, 清理代码
 --一个有效input之后要禁止输入, 对应动画效果播放完毕之后才允许输入; 最后加入p2, 合并p1p2功能
 function init(self)
     cc.init(on_state_change)
