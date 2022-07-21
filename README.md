@@ -1,29 +1,14 @@
-# Welcome to Colyseus!
+# Palamedes Online
 
-This project has been created using [⚔️ `create-colyseus-app`](https://github.com/colyseus/create-colyseus-app/) - an npm init template for kick starting a Colyseus project in TypeScript.
+https://www.youtube.com/watch?v=dlKRhjqefPU
 
-[Documentation](http://docs.colyseus.io/)
+## 介绍
 
-## :crossed_swords: Usage
+本项目是开源游戏 Palamedes Online 的代码库, 包括服务端与客户端所有代码.
 
-```
-npm start
-```
-
-## Structure
-
-- `index.ts`: main entry point, register an empty room handler and attach [`@colyseus/monitor`](https://github.com/colyseus/colyseus-monitor)
-- `src/rooms/MyRoom.ts`: an empty room handler for you to implement your logic
-- `src/rooms/schema/GameState.ts`: an empty schema used on your room's state.
-- `loadtest/example.ts`: scriptable client for the loadtest tool (see `npm run loadtest`)
-- `package.json`:
-    - `scripts`:
-        - `npm start`: runs `ts-node-dev index.ts`
-        - `npm test`: runs mocha test suite
-        - `npm run loadtest`: runs the [`@colyseus/loadtest`](https://github.com/colyseus/colyseus-loadtest/) tool for testing the connection, using the `loadtest/example.ts` script.
-- `tsconfig.json`: TypeScript configuration file
+## 特性
 
 
-## License
+## 许可证
 
 MIT
