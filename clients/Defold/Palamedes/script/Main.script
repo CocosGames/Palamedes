@@ -110,25 +110,33 @@ function update(self, dt)
         local p1_box_pos = go.get_position(p1_box)
         local p1u = math.ceil((p1_box_pos.x - p1_startX) / box_size)
         local p1v = board_height - math.ceil((p1_box_pos.y - p1_startY) / box_size)
-        local p1i = (p1v - 1) * board_width + p1u
-        if p1_board[p1i] ~= nil then
-            local n = go.get(msg.url(nil, p1_board[p1i], "sprite"), "animation")
-            if n == hash(p1_dice) then
-                msg.post(msg.url(nil, p1_board[p1i], "sprite"), "play_animation", { id = hash("boom") })
-                cc.send("shoot", { i = p1i })
-            end
-            msg.post(p1_box, "disable")
-            p1_shooting = false
-        end
-
-        p1_box_pos = go.get_position(p1_box) + vmath.vector3(0, box_speed, 0);
-        go.set_position(p1_box_pos, p1_box)
+        local p1i
         if p1v <= 0 then
             msg.post(p1_box, "disable")
             p1_shooting = false
+        else
+            for i = board_height, 1, -1 do
+                p1i= p1_board[(i - 1) * board_width + p1u]
+                if p1i ~= nil and p1v<i then
+                    p1v = i
+                    break;
+                end
+            end
+            p1i = (p1v - 1) * board_width + p1u
+            if p1_board[p1i] ~= nil then
+                local d = go.get(msg.url(nil, p1_board[p1i], "sprite"), "animation")
+                if d == hash(p1_dice) then
+                    msg.post(msg.url(nil, p1_board[p1i], "sprite"), "play_animation", { id = hash("boom") })
+                    cc.send("shoot", { i = p1i })
+                end
+                msg.post(p1_box, "disable")
+                p1_shooting = false
+            else
+                p1_box_pos = go.get_position(p1_box) + vmath.vector3(0, box_speed, 0);
+                go.set_position(p1_box_pos, p1_box)
+            end
         end
     end
-
 end
 
 function on_message(self, message_id, message, sender)
