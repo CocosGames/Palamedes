@@ -58,6 +58,10 @@ images {
   image: "/raw/lines.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
+images {
+  image: "/raw/bg_m.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
 animations {
   id: "boom"
   images {
