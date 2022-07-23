@@ -1,0 +1,12 @@
+local monarch = require "monarch.monarch"
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	msg.post("#", "show_login")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show_login") then
+		monarch.show("login_scene")
+	end
+end

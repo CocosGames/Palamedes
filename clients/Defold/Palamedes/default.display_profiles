@@ -1,0 +1,7 @@
+profiles {
+  name: "Landscape"
+  qualifiers {
+    width: 960
+    height: 640
+  }
+}
