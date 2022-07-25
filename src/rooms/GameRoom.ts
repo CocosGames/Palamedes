@@ -87,6 +87,13 @@ export class GameRoom extends Room<GameState> {
                 }, GameRoom.MAGIC_TIMEOUT * 1000);
                 this.state.players.get(client.sessionId).history = new ArraySchema<number>();
                 this.removeLines(client, lr);
+                for (var i = 0; i <= this.clients.length; i++) {
+                    if (this.clients[i].sessionId != client.sessionId) {
+                        this.addLines(this.clients[i], lr);
+                        break;
+                    }
+
+                }
             }
         });
     }
@@ -169,7 +176,6 @@ export class GameRoom extends Room<GameState> {
         if (l > bl)
             l = bl;
         this.state.players.get(c.sessionId).board = b.slice(0, b.length - l * GameRoom.BOARD_WIDTH) as ArraySchema<number>;
-        console.log(l + " lines removed!");
     }
 
     addLines(c: Client, l: number = 1) {
@@ -184,6 +190,11 @@ export class GameRoom extends Room<GameState> {
             //     this.state.players.get(c.sessionId).board.unshift(line[k]);
             // }
         }
+        this.checkWin()
+    }
+
+    checkWin() {
+
     }
 
     onJoin(client: Client, options: any) {
@@ -193,8 +204,8 @@ export class GameRoom extends Room<GameState> {
         if (this.state.players.size == 2) {
             this.lock();
             this.clients.forEach((c, i, a) => {
-                    this.addLines(c, GameRoom.INIT_LINES);
-                });
+                this.addLines(c, GameRoom.INIT_LINES);
+            });
             this.clock.setInterval(() => {
                 this.clients.forEach((c, i, a) => {
                     this.addLines(c);
