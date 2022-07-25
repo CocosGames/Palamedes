@@ -3,10 +3,6 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/raw/box.png"
-  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
-}
-images {
   image: "/raw/character/akuma.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
@@ -59,19 +55,19 @@ images {
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/raw/bg_m.png"
+  image: "/raw/ready.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/raw/title.png"
+  image: "/raw/start.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/raw/game_button.png"
+  image: "/raw/waiting.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 images {
-  image: "/raw/info_button.png"
+  image: "/raw/character/akuma_g.png"
   sprite_trim_mode: SPRITE_TRIM_MODE_OFF
 }
 animations {

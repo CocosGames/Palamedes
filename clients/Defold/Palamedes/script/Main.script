@@ -6,96 +6,147 @@ local board_width = 6
 local board_height = 10
 local move_speed = 10
 local box_speed = 12
+local gaming = false
 
-local p1_pos = 1 --1~6
-local p1_startX = 140
-local p1_startY = 138
-local p1_historyX = 140
-local p1_historyY = 45
-local p1_dice = 1 --1~6
-local p1_box = "/box1"
-local p1_magic_num = "/num1"
-local p1_magic_lines = "/lines1"
-local p1_board = {}
-local p1_history = {}
-local p1_shooting = false
-local p1_moving = false
+local p1 = {}
+p1.id = 1
+p1.pos = 1 --1~6
+p1.startX = 140
+p1.startY = 138
+p1.hisX = 140
+p1.hisY = 45
+p1.dice = 1 --1~6
+p1.box = "/box1"
+p1.magicNum = "/num1"
+p1.magicLines = "/lines1"
+p1.board = {}
+p1.history = {}
+p1.shooting = false
+p1.moving = false
 
+local p2 = {}
+p2.id = 2
+p2.pos = 1 --1~6
+p2.startX = 500
+p2.startY = 138
+p2.hisX = 500
+p2.hisY = 45
+p2.dice = 1 --1~6
+p2.box = "/box2"
+p2.magicNum = "/num2"
+p2.magicLines = "/lines2"
+p2.board = {}
+p2.history = {}
+p2.shooting = false
+p2.moving = false
 
--- 达到十行分胜负. 
---一个有效input之后要禁止输入, 对应动画效果播放完毕之后才允许输入; 最后加入p2, 合并p1p2功能
+-- 此消彼长, 达到十行分胜负.
+--一个有效input之后要禁止输入, 对应动画效果播放完毕之后才允许输入
 function init(self)
     cc.init(on_state_change)
-    msg.post(p1_box, "disable")
-    msg.post(p1_magic_num, "disable")
-    msg.post(p1_magic_lines, "disable")
+    msg.post(p1.box, "disable")
+    msg.post(p1.magicNum, "disable")
+    msg.post(p1.magicLines, "disable")
+    msg.post(p2.box, "disable")
+    msg.post(p2.magicNum, "disable")
+    msg.post(p2.magicLines, "disable")
     msg.post(".", "acquire_input_focus")
 end
 
 function on_state_change(state)
-    local newstate = state.players[cc.id];
-    update_board(newstate.board)
-    update_history(newstate.history)
-    update_magic(newstate.magic)
-    if newstate.pos ~= p1_pos then
-        p1_pos = newstate.pos
-        go.animate("/p1", "position.x", go.PLAYBACK_ONCE_FORWARD, p1_startX + p1_pos * box_size, go.EASING_LINEAR, 1 / move_speed, 0, function()
-            p1_moving = false
+    --pprint(state.players)
+
+    for k,v in pairs(state.players.items) do
+        update_board(whichOne(k), v.board)
+        update_history(whichOne(k), v.history)
+        update_magic(whichOne(k), v.magic)
+        update_dice(whichOne(k), v.dice)
+        update_pos(whichOne(k), v.pos)
+    end
+end
+
+function whichOne(id)
+    local p = p1
+    if (id ~= cc.id) then
+        p = p2
+    end
+    return p
+end
+
+function update_dice(p, dice)
+    if dice == nil then
+        return
+    end
+    if dice ~= p.dice then
+        p.dice = dice
+        msg.post("/dice"..p.id.."#sprite", "play_animation", { id = hash(dice) })
+    end
+end
+
+function update_pos(p, pos)
+    if pos == nil then
+        return
+    end
+    if pos ~= p.pos then
+        p.pos = pos
+        go.animate("/p"..p.id, "position.x", go.PLAYBACK_ONCE_FORWARD, p.startX + pos * box_size, go.EASING_LINEAR, 1 / move_speed, 0, function()
+            p.moving = false
         end)
     end
-    if newstate.dice ~= p1_dice then
-        p1_dice = newstate.dice
-        msg.post("/dice1#sprite", "play_animation", { id = hash(newstate.dice) })
-    end
 end
 
-function update_board(b)
-    go.delete(p1_board)
-    p1_board = {}
-    for i, v in ipairs(b.items) do
-        local px = p1_startX + ((i - 1) % board_width + 1) * box_size;
-        local py = p1_startY + (board_height - math.floor((i - 1) / board_width) - 1) * box_size;
+function update_board(p, board)
+    if board == nil then
+        return
+    end
+    go.delete(p.board)
+    p.board = {}
+    for i, v in ipairs(board.items) do
+        local px = p.startX + ((i - 1) % board_width + 1) * box_size;
+        local py = p.startY + (board_height - math.floor((i - 1) / board_width) - 1) * box_size;
         if v > 0 then
-            local p = vmath.vector3(px, py, box_z)
-            local piece = factory.create("/board#factory", p)
+            local pos = vmath.vector3(px, py, box_z)
+            local piece = factory.create("/board#factory", pos)
             msg.post(msg.url(nil, piece, "sprite"), "play_animation", { id = hash(v) })
-            p1_board[i] = piece
+            p.board[i] = piece
         end
     end
 end
 
-function update_history(h)
-    go.delete(p1_history)
-    p1_history = {}
-    local empty = (board_width - #h.items) * box_size
-    for i, v in ipairs(h.items) do
-        local px = empty + p1_historyX + ((i - 1) % board_width + 1) * box_size;
-        local p = vmath.vector3(px, p1_historyY, box_z)
-        local piece = factory.create("/board#factory", p)
+function update_history(p, his)
+    if his == nil then
+        return
+    end
+    go.delete(p.history)
+    p.history = {}
+    local empty = (board_width - #his.items) * box_size
+    for i, v in ipairs(his.items) do
+        local px = empty + p.hisX + ((i - 1) % board_width + 1) * box_size;
+        local pos = vmath.vector3(px, p1.hisY, box_z)
+        local piece = factory.create("/board#factory", pos)
         msg.post(msg.url(nil, piece, "sprite"), "play_animation", { id = hash(v) })
-        p1_history[i] = piece
+        p.history[i] = piece
     end
 end
 
-function update_magic(l)
-    if l == 0 then
-        msg.post(p1_magic_num, "disable")
-        msg.post(p1_magic_lines, "disable")
+function update_magic(p, lines)
+    if lines == nil then
+        return
+    end
+    if lines == 0 then
+        msg.post(p.magicNum, "disable")
+        msg.post(p.magicLines, "disable")
     else
-        if l == 1 then
-            msg.post(p1_magic_num .. "#sprite", "play_animation", { id = hash("l1") })
-            msg.post(p1_magic_lines .. "#sprite", "play_animation", { id = hash("line") })
-        elseif l > 1 then
-            msg.post(p1_magic_num .. "#sprite", "play_animation", { id = hash("l" .. l) })
-            msg.post(p1_magic_lines .. "#sprite", "play_animation", { id = hash("lines") })
+        if lines == 1 then
+            msg.post(p.magicNum .. "#sprite", "play_animation", { id = hash("l1") })
+            msg.post(p.magicLines .. "#sprite", "play_animation", { id = hash("line") })
+        elseif lines > 1 then
+            msg.post(p.magicNum .. "#sprite", "play_animation", { id = hash("l" .. lines) })
+            msg.post(p.magicLines .. "#sprite", "play_animation", { id = hash("lines") })
         end
-        msg.post(p1_magic_num, "enable")
-        msg.post(p1_magic_lines, "enable")
+        msg.post(p.magicNum, "enable")
+        msg.post(p.magicLines, "enable")
     end
-end
-
-function test_callback()
-    print("test ok.")
 end
 
 function final(self)
@@ -105,34 +156,34 @@ function final(self)
 end
 
 function update(self, dt)
-    if p1_shooting then
-        local p1_box_pos = go.get_position(p1_box)
-        local p1u = math.ceil((p1_box_pos.x - p1_startX) / box_size)
-        local p1v = board_height - math.ceil((p1_box_pos.y - p1_startY) / box_size)
+    if p1.shooting then
+        local p1_box_pos = go.get_position(p1.box)
+        local p1u = math.ceil((p1_box_pos.x - p1.startX) / box_size)
+        local p1v = board_height - math.ceil((p1_box_pos.y - p1.startY) / box_size)
         local p1i = 1
         if p1v <= 0 then
-            msg.post(p1_box, "disable")
-            p1_shooting = false
+            msg.post(p1.box, "disable")
+            p1.shooting = false
         else
             for i = board_height, 1, -1 do
-                p1i = p1_board[(i - 1) * board_width + p1u]
+                p1i = p1.board[(i - 1) * board_width + p1u]
                 if p1i ~= nil and p1v < i then
                     p1v = i
                     break ;
                 end
             end
             p1i = (p1v - 1) * board_width + p1u
-            if p1_board[p1i] ~= nil then
-                local d = go.get(msg.url(nil, p1_board[p1i], "sprite"), "animation")
-                if d == hash(p1_dice) then
-                    msg.post(msg.url(nil, p1_board[p1i], "sprite"), "play_animation", { id = hash("boom") })
+            if p1.board[p1i] ~= nil then
+                local d = go.get(msg.url(nil, p1.board[p1i], "sprite"), "animation")
+                if d == hash(p1.dice) then
+                    msg.post(msg.url(nil, p1.board[p1i], "sprite"), "play_animation", { id = hash("boom") })
                     cc.send("shoot", { i = p1i })
                 end
-                msg.post(p1_box, "disable")
-                p1_shooting = false
+                msg.post(p1.box, "disable")
+                p1.shooting = false
             else
-                p1_box_pos = go.get_position(p1_box) + vmath.vector3(0, box_speed, 0);
-                go.set_position(p1_box_pos, p1_box)
+                p1_box_pos = go.get_position(p1.box) + vmath.vector3(0, box_speed, 0);
+                go.set_position(p1_box_pos, p1.box)
             end
         end
     end
@@ -140,29 +191,29 @@ end
 
 function on_message(self, message_id, message, sender)
     if message_id == hash("on_gesture") or message_id == hash("input") then
-        if p1_moving == false then
+        if p1.moving == false then
             if message.action_id == hash("left") or message.swipe_left then
-                if (p1_pos > 1) then
-                    p1_moving = true
+                if (p1.pos > 1) then
+                    p1.moving = true
                     cc.send("move", { dir = "l" })
                 end
             elseif message.action_id == hash("right") or message.swipe_right then
-                if (p1_pos < board_width) then
-                    p1_moving = true
+                if (p1.pos < board_width) then
+                    p1.moving = true
                     cc.send("move", { dir = "r" })
                 end
             end
         end
         if message.action_id == hash("up") or message.swipe_up then
-            if p1_shooting == false then
-                local p = vmath.vector3(p1_startX + p1_pos * box_size, p1_startY, box_z)
-                go.set_position(p, p1_box)
-                msg.post(msg.url(nil, p1_box, "sprite"), "play_animation", { id = hash(p1_dice) })
-                msg.post(p1_box, "enable")
-                p1_shooting = true
+            if p1.shooting == false then
+                local p = vmath.vector3(p1.startX + p1.pos * box_size, p1.startY, box_z)
+                go.set_position(p, p1.box)
+                msg.post(msg.url(nil, p1.box, "sprite"), "play_animation", { id = hash(p1.dice) })
+                msg.post(p1.box, "enable")
+                p1.shooting = true
             end
         elseif message.action_id == hash("down") or message.swipe_down then
-            if (#p1_history >= board_width / 2) then
+            if (#p1.history >= board_width / 2) then
                 cc.send("magic")
             end
         elseif message.action_id == hash("roll") or message.tap then

@@ -1,11 +1,12 @@
 local gooey = require "gooey.gooey"
+local monarch = require "monarch.monarch"
 
 function init(self)
 	gooey.acquire_input()
 end
 
 local function on_pressed(button)
-	print("pressed")
+	monarch.show("game_scene")
 end
 
 function on_input(self, action_id, action)

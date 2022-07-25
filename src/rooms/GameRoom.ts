@@ -14,11 +14,6 @@ export class GameRoom extends Room<GameState> {
 
     onCreate(options: any) {
         this.setState(new GameState());
-        this.clock.setInterval(() => {
-            this.clients.forEach((c, i, a) => {
-                this.addLines(c);
-            });
-        }, GameRoom.DROP_TIMEOUT * 1000);
 
         this.onMessage("move", (client, message) => {
                 console.log("message move received: " + message.dir);
@@ -131,7 +126,7 @@ export class GameRoom extends Room<GameState> {
             if (h.indexOf(pattern6[i]) >= 0)
                 return 4;
         }
-        if (h.length==GameRoom.DICE_NUM) {
+        if (h.length == GameRoom.DICE_NUM) {
             let p6_1 = h.substr(0, 2);
             if (h == (p6_1 + p6_1 + p6_1))
                 return 3;
@@ -178,12 +173,12 @@ export class GameRoom extends Room<GameState> {
     }
 
     addLines(c: Client, l: number = 1) {
-        let b = this.state.players.get(c.sessionId).board;
         for (var i = 0; i < l; i++) {
             let line: ArraySchema<number> = new ArraySchema<number>();
             for (var j = 0; j < GameRoom.BOARD_WIDTH; j++) {
                 line.push(Math.ceil(Math.random() * GameRoom.DICE_NUM));
             }
+            let b = this.state.players.get(c.sessionId).board;
             this.state.players.get(c.sessionId).board = line.concat(b.toJSON());
             // for (var k = line.length-1; k >= 0; k--) {
             //     this.state.players.get(c.sessionId).board.unshift(line[k]);
@@ -194,6 +189,18 @@ export class GameRoom extends Room<GameState> {
     onJoin(client: Client, options: any) {
         console.log(client.sessionId, "joined!");
         this.state.players.set(client.sessionId, new Player());
+        this.state.players.get(client.sessionId).ready = true;
+        if (this.state.players.size == 2) {
+            this.lock();
+            this.clients.forEach((c, i, a) => {
+                    this.addLines(c, GameRoom.INIT_LINES);
+                });
+            this.clock.setInterval(() => {
+                this.clients.forEach((c, i, a) => {
+                    this.addLines(c);
+                });
+            }, GameRoom.DROP_TIMEOUT * 1000);
+        }
     }
 
     onLeave(client: Client, consented: boolean) {

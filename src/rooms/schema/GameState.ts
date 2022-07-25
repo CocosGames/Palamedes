@@ -7,13 +7,7 @@ export class Player extends Schema {
     @type("number") magic: number = 0; //0~4
     @type(["number"]) board: ArraySchema<number> = new ArraySchema<number>();
     @type(["number"]) history: ArraySchema<number> = new ArraySchema<number>();
-
-    constructor() {
-        super();
-        for (let i = 0; i < GameRoom.INIT_LINES * GameRoom.BOARD_WIDTH; i++) {
-            this.board.push(Math.ceil(Math.random()*GameRoom.DICE_NUM));
-        }
-    }
+    @type("boolean") ready = false;
 }
 
 export class GameState extends Schema {
