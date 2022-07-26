@@ -262,6 +262,10 @@ function on_message(self, message_id, message, sender)
                 cc.send("roll")
             end
         end
+    else
+        if message.action_id == hash("roll") or message.tap then
+            cc.send("ready")
+        end
     end
 end
 

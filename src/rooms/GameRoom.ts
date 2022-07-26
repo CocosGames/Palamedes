@@ -28,7 +28,7 @@ export class GameRoom extends Room<GameState> {
         );
 
         this.onMessage("roll", (client, message) => {
-                console.log("message roll recelived.");
+                console.log("message roll received.");
                 if (this.state.players.get(client.sessionId).dice == 6) {
                     this.state.players.get(client.sessionId).dice = 1
                 } else {
@@ -38,13 +38,13 @@ export class GameRoom extends Room<GameState> {
         );
 
         this.onMessage("shoot", (client, message) => {
-                console.log("message shoot recelived.");
+                console.log("message shoot received.");
                 this.state.players.get(client.sessionId).shooting = (message.d > 0);
             }
         );
 
         this.onMessage("boom", (client, message) => {
-                console.log("message boom recelived: " + message.i);
+                console.log("message boom received: " + message.i);
                 // this.state.players.get(client.sessionId).board[message.i-1] = 0;
                 let col = [];
                 let clean = true;
@@ -84,7 +84,7 @@ export class GameRoom extends Room<GameState> {
         );
 
         this.onMessage("magic", (client, message) => {
-            console.log("message magic recelived.");
+            console.log("message magic received.");
             let lr = this.patternMagic(this.state.players.get(client.sessionId).history.toJSON());
             if (lr > 0) {
                 this.state.players.get(client.sessionId).magic = lr;
@@ -101,6 +101,11 @@ export class GameRoom extends Room<GameState> {
 
                 }
             }
+        });
+
+        this.onMessage("ready", (client, message) => {
+            console.log("message ready received.");
+            this.onJoin(client, message);
         });
     }
 
@@ -202,6 +207,7 @@ export class GameRoom extends Room<GameState> {
         if (Math.ceil(this.state.players.get(c.sessionId).board.length / GameRoom.BOARD_WIDTH)>=GameRoom.BOARD_HEIGHT) {
             this.clock.stop();
             this.clock.clear();
+            this.setState(new GameState());
             this.state.players.forEach((p,k,m)=>{
                 p.ready = false;
             })
