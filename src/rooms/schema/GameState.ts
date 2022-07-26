@@ -7,7 +7,8 @@ export class Player extends Schema {
     @type("number") magic: number = 0; //0~4
     @type(["number"]) board: ArraySchema<number> = new ArraySchema<number>();
     @type(["number"]) history: ArraySchema<number> = new ArraySchema<number>();
-    @type("boolean") ready = false;
+    @type("boolean") ready:boolean = false;
+    @type("boolean") shooting:boolean = false;
 }
 
 export class GameState extends Schema {

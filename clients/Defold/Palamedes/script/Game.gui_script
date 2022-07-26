@@ -1,0 +1,24 @@
+local gooey = require "gooey.gooey"
+local monarch = require "monarch.monarch"
+
+function init(self)
+    gui.set_enabled(gui.get_node("start"), false)
+    gui.set_enabled(gui.get_node("p2_avatar"), false)
+    gui.set_enabled(gui.get_node("p1_win"), false)
+    gui.set_enabled(gui.get_node("p2_win"), false)
+    gui.set_enabled(gui.get_node("restart"), false)
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("waiting") then
+        gui.set_enabled(gui.get_node("waiting"), message.show)
+        if message.show == false then
+            gui.set_enabled(gui.get_node("p2_avatar"), true)
+            gui.set_enabled(gui.get_node("start"), true)
+            gui.animate(gui.get_node("start"), "scale", vmath.vector3(1, 1, 1), gui.EASING_OUTBOUNCE, 1, 0.5, function()
+                gui.set_scale(gui.get_node("start"), vmath.vector3(0.5, 0.5, 0.5))
+                gui.set_enabled(gui.get_node("start"), false)
+            end)
+        end
+    end
+end

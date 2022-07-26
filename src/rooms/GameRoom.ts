@@ -28,7 +28,7 @@ export class GameRoom extends Room<GameState> {
         );
 
         this.onMessage("roll", (client, message) => {
-                console.log("message roll recelived.")
+                console.log("message roll recelived.");
                 if (this.state.players.get(client.sessionId).dice == 6) {
                     this.state.players.get(client.sessionId).dice = 1
                 } else {
@@ -38,7 +38,13 @@ export class GameRoom extends Room<GameState> {
         );
 
         this.onMessage("shoot", (client, message) => {
-                console.log("message shoot recelived: " + message.i);
+                console.log("message shoot recelived.");
+                this.state.players.get(client.sessionId).shooting = (message.d > 0);
+            }
+        );
+
+        this.onMessage("boom", (client, message) => {
+                console.log("message boom recelived: " + message.i);
                 // this.state.players.get(client.sessionId).board[message.i-1] = 0;
                 let col = [];
                 let clean = true;
@@ -179,22 +185,27 @@ export class GameRoom extends Room<GameState> {
     }
 
     addLines(c: Client, l: number = 1) {
+        let b = this.state.players.get(c.sessionId).board;
+        let bl = Math.ceil(b.length / GameRoom.BOARD_WIDTH);
+        if (l + bl > GameRoom.BOARD_HEIGHT)
+            l = GameRoom.BOARD_HEIGHT - bl;
         for (var i = 0; i < l; i++) {
             let line: ArraySchema<number> = new ArraySchema<number>();
             for (var j = 0; j < GameRoom.BOARD_WIDTH; j++) {
                 line.push(Math.ceil(Math.random() * GameRoom.DICE_NUM));
             }
-            let b = this.state.players.get(c.sessionId).board;
             this.state.players.get(c.sessionId).board = line.concat(b.toJSON());
             // for (var k = line.length-1; k >= 0; k--) {
             //     this.state.players.get(c.sessionId).board.unshift(line[k]);
             // }
         }
-        this.checkWin()
-    }
-
-    checkWin() {
-
+        if (Math.ceil(this.state.players.get(c.sessionId).board.length / GameRoom.BOARD_WIDTH)>=GameRoom.BOARD_HEIGHT) {
+            this.clock.stop();
+            this.clock.clear();
+            this.state.players.forEach((p,k,m)=>{
+                p.ready = false;
+            })
+        }
     }
 
     onJoin(client: Client, options: any) {
