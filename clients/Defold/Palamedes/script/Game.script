@@ -7,6 +7,7 @@ local board_height = 10
 local move_speed = 10
 local box_speed = 12
 local gaming = false
+local inited = false
 
 local p1 = {}
 p1.id = 1
@@ -42,10 +43,12 @@ p2.history = {}
 p2.shooting = false
 p2.moving = false
 
--- 此消彼长, 达到十行分胜负.
---一个有效input之后要禁止输入, 对应动画效果播放完毕之后才允许输入
 function init(self)
-    cc.init(on_state_change)
+    startGame()
+end
+
+function startGame()
+    cc.init(on_state_change, on_leave)
     msg.post(p1.box, "disable")
     msg.post(p1.magicNum, "disable")
     msg.post(p1.magicLines, "disable")
@@ -54,11 +57,27 @@ function init(self)
     msg.post(p2.magicLines, "disable")
     msg.post("/p2", "disable")
     msg.post("/dice2", "disable")
+    msg.post("/gui#game", "waiting", { show = true })
+    msg.post("/gui#game", "restart", { show = false })
+    msg.post("/gui#game", "win", { show = false })
     msg.post(".", "acquire_input_focus")
+    inited = true
+end
+
+function on_leave()
+    p1.ready = false
+    p2.ready = false
+    gaming = false
+    inited = false
+    msg.post("/gui#game", "restart", { show = true })
+    if #p1.board > #p2.board then
+        msg.post("/gui#game", "win", { show = true, winner="p2" })
+    else
+        msg.post("/gui#game", "win", { show = true, winner="p1" })
+    end
 end
 
 function on_state_change(state)
-    --pprint(state.players)
     for k, v in pairs(state.players.items) do
         update_ready(whichOne(k), v.ready)
         update_board(whichOne(k), v.board)
@@ -71,16 +90,11 @@ function on_state_change(state)
     if gaming == false then
         if p1.ready and p2.ready then
             msg.post("/gui#game", "waiting", { show = false })
+            msg.post("/gui#game", "restart", { show = false })
+            msg.post("/gui#game", "win", { show = false })
             msg.post("/p2", "enable")
             msg.post("/dice2", "enable")
             gaming = true
-        end
-    else
-        if p1.ready == false or p2.ready == false then
-            --msg.post("/gui#game", "waiting", { show = true })
-            --msg.post("/p2", "disable")
-            --msg.post("/dice2", "disable")
-            gaming = false
         end
     end
 end
@@ -262,9 +276,9 @@ function on_message(self, message_id, message, sender)
                 cc.send("roll")
             end
         end
-    else
+    elseif not inited then
         if message.action_id == hash("roll") or message.tap then
-            cc.send("ready")
+            startGame()
         end
     end
 end

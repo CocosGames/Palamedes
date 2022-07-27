@@ -20,5 +20,14 @@ function on_message(self, message_id, message, sender)
                 gui.set_enabled(gui.get_node("start"), false)
             end)
         end
+    elseif message_id == hash("win") then
+        if message.show then
+            gui.set_enabled(gui.get_node(message.winner .. "_win"), true)
+        else
+            gui.set_enabled(gui.get_node("p1_win"), false)
+            gui.set_enabled(gui.get_node("p2_win"), false)
+        end
+    elseif message_id == hash("restart") then
+        gui.set_enabled(gui.get_node("restart"), message.show)
     end
 end

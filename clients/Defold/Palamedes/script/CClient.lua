@@ -5,7 +5,7 @@ local ColyseusClient = require "colyseus.client"
 local client
 local room
 
-function M.init(callback)
+function M.init(osc, ol)
     client = ColyseusClient.new("ws://localhost:2567")
     --client = ColyseusClient.new("https://cyan-weary-angelfish.cyclic.app/")
     client:join_or_create("game", {}, function(err, _room)
@@ -16,7 +16,8 @@ function M.init(callback)
 
         room = _room
         M.id = _room.sessionId;
-        room:on("statechange", callback)
+        room:on("statechange", osc)
+        room:on("leave", ol)
     end)
 end
 

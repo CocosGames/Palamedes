@@ -6,6 +6,7 @@ export class GameRoom extends Room<GameState> {
 
     public static DROP_TIMEOUT = 8;
     public static MAGIC_TIMEOUT = 2;
+    public static WIN_TIMEOUT = 1;
     public static BOARD_WIDTH = 6;
     public static BOARD_HEIGHT = 10;
     public static PLAYER_NUM = 2;
@@ -14,98 +15,102 @@ export class GameRoom extends Room<GameState> {
 
     onCreate(options: any) {
         this.setState(new GameState());
-
         this.onMessage("move", (client, message) => {
                 console.log("message move received: " + message.dir);
-                if (message.dir == "l") {
-                    if (this.state.players.get(client.sessionId).pos > 1)
-                        this.state.players.get(client.sessionId).pos--;
-                } else if (message.dir == "r") {
-                    if (this.state.players.get(client.sessionId).pos < GameRoom.BOARD_WIDTH)
-                        this.state.players.get(client.sessionId).pos++;
+                if (this.state.players.get(client.sessionId)) {
+                    if (message.dir == "l") {
+                        if (this.state.players.get(client.sessionId).pos > 1)
+                            this.state.players.get(client.sessionId).pos--;
+                    } else if (message.dir == "r") {
+                        if (this.state.players.get(client.sessionId).pos < GameRoom.BOARD_WIDTH)
+                            this.state.players.get(client.sessionId).pos++;
+                    }
                 }
             }
         );
 
         this.onMessage("roll", (client, message) => {
                 console.log("message roll received.");
-                if (this.state.players.get(client.sessionId).dice == 6) {
-                    this.state.players.get(client.sessionId).dice = 1
-                } else {
-                    this.state.players.get(client.sessionId).dice++;
+                if (this.state.players.get(client.sessionId)) {
+                    if (this.state.players.get(client.sessionId).dice == 6) {
+                        this.state.players.get(client.sessionId).dice = 1
+                    } else {
+                        this.state.players.get(client.sessionId).dice++;
+                    }
                 }
             }
         );
 
         this.onMessage("shoot", (client, message) => {
                 console.log("message shoot received.");
-                this.state.players.get(client.sessionId).shooting = (message.d > 0);
+                if (this.state.players.get(client.sessionId)) {
+                    this.state.players.get(client.sessionId).shooting = (message.d > 0);
+                }
             }
         );
 
         this.onMessage("boom", (client, message) => {
                 console.log("message boom received: " + message.i);
-                // this.state.players.get(client.sessionId).board[message.i-1] = 0;
-                let col = [];
-                let clean = true;
-                for (var n = this.state.players.get(client.sessionId).pos - 1; n < GameRoom.BOARD_WIDTH * GameRoom.BOARD_HEIGHT; n += GameRoom.BOARD_WIDTH) {
-                    col.push(n);
-                }
-                col = col.reverse();
-                let b = this.state.players.get(client.sessionId).board;
-                for (var m = 0; m < col.length; m++) {
-                    if (b[col[m]] == 0 || b[col[m]] == null)
-                        continue;
-                    if (b[col[m]] == this.state.players.get(client.sessionId).dice && col[m] == message.i - 1) {
-                        this.state.players.get(client.sessionId).board[col[m]] = 0;
-                        let h = this.state.players.get(client.sessionId).history.toJSON();
-                        if (h.length >= GameRoom.BOARD_WIDTH)
-                            h.shift();
-                        h.push(this.state.players.get(client.sessionId).dice)
-                        this.state.players.get(client.sessionId).history = new ArraySchema<number>().concat(h);
-                        // this.state.players.get(client.sessionId).history = h.slice(h.length - GameRoom.BOARD_WIDTH, this.state.players.get(client.sessionId).history.length);
-                        clean = false;
+                if (this.state.players.get(client.sessionId)) {
+                    // this.state.players.get(client.sessionId).board[message.i-1] = 0;
+                    let col = [];
+                    let clean = true;
+                    for (var n = this.state.players.get(client.sessionId).pos - 1; n < GameRoom.BOARD_WIDTH * GameRoom.BOARD_HEIGHT; n += GameRoom.BOARD_WIDTH) {
+                        col.push(n);
                     }
-                    break;
-                }
-                if (!clean) {
-                    let removeZeros = true;
-                    let board = this.state.players.get(client.sessionId).board;
-                    for (var l = board.length - 1; l >= board.length - GameRoom.BOARD_WIDTH; l--) {
-                        if (board[l] != 0) {
-                            removeZeros = false;
-                            break;
+                    col = col.reverse();
+                    let b = this.state.players.get(client.sessionId).board;
+                    for (var m = 0; m < col.length; m++) {
+                        if (b[col[m]] == 0 || b[col[m]] == null)
+                            continue;
+                        if (b[col[m]] == this.state.players.get(client.sessionId).dice && col[m] == message.i - 1) {
+                            this.state.players.get(client.sessionId).board[col[m]] = 0;
+                            let h = this.state.players.get(client.sessionId).history.toJSON();
+                            if (h.length >= GameRoom.BOARD_WIDTH)
+                                h.shift();
+                            h.push(this.state.players.get(client.sessionId).dice)
+                            this.state.players.get(client.sessionId).history = new ArraySchema<number>().concat(h);
+                            // this.state.players.get(client.sessionId).history = h.slice(h.length - GameRoom.BOARD_WIDTH, this.state.players.get(client.sessionId).history.length);
+                            clean = false;
                         }
+                        break;
                     }
-                    if (removeZeros)
-                        this.removeLines(client, 1);
+                    if (!clean) {
+                        let removeZeros = true;
+                        let board = this.state.players.get(client.sessionId).board;
+                        for (var l = board.length - 1; l >= board.length - GameRoom.BOARD_WIDTH; l--) {
+                            if (board[l] != 0) {
+                                removeZeros = false;
+                                break;
+                            }
+                        }
+                        if (removeZeros)
+                            this.removeLines(client, 1);
+                    }
                 }
             }
         );
 
         this.onMessage("magic", (client, message) => {
             console.log("message magic received.");
-            let lr = this.patternMagic(this.state.players.get(client.sessionId).history.toJSON());
-            if (lr > 0) {
-                this.state.players.get(client.sessionId).magic = lr;
-                this.clock.setTimeout(() => {
-                    this.state.players.get(client.sessionId).magic = 0;
-                }, GameRoom.MAGIC_TIMEOUT * 1000);
-                this.state.players.get(client.sessionId).history = new ArraySchema<number>();
-                this.removeLines(client, lr);
-                for (var i = 0; i <= this.clients.length; i++) {
-                    if (this.clients[i].sessionId != client.sessionId) {
-                        this.addLines(this.clients[i], lr);
-                        break;
-                    }
+            if (this.state.players.get(client.sessionId)) {
+                let lr = this.patternMagic(this.state.players.get(client.sessionId).history.toJSON());
+                if (lr > 0) {
+                    this.state.players.get(client.sessionId).magic = lr;
+                    this.clock.setTimeout(() => {
+                        this.state.players.get(client.sessionId).magic = 0;
+                    }, GameRoom.MAGIC_TIMEOUT * 1000);
+                    this.state.players.get(client.sessionId).history = new ArraySchema<number>();
+                    this.removeLines(client, lr);
+                    for (var i = 0; i <= this.clients.length; i++) {
+                        if (this.clients[i].sessionId != client.sessionId) {
+                            this.addLines(this.clients[i], lr);
+                            break;
+                        }
 
+                    }
                 }
             }
-        });
-
-        this.onMessage("ready", (client, message) => {
-            console.log("message ready received.");
-            this.onJoin(client, message);
         });
     }
 
@@ -182,35 +187,41 @@ export class GameRoom extends Room<GameState> {
     }
 
     removeLines(c: Client, l: number = 1) {
-        let b = this.state.players.get(c.sessionId).board;
-        let bl = Math.ceil(b.length / GameRoom.BOARD_WIDTH);
-        if (l > bl)
-            l = bl;
-        this.state.players.get(c.sessionId).board = b.slice(0, b.length - l * GameRoom.BOARD_WIDTH) as ArraySchema<number>;
+        if (this.state.players.get(c.sessionId)) {
+            let b = this.state.players.get(c.sessionId).board;
+            let bl = Math.ceil(b.length / GameRoom.BOARD_WIDTH);
+            if (l > bl)
+                l = bl;
+            this.state.players.get(c.sessionId).board = b.slice(0, b.length - l * GameRoom.BOARD_WIDTH) as ArraySchema<number>;
+        }
     }
 
     addLines(c: Client, l: number = 1) {
-        let b = this.state.players.get(c.sessionId).board;
-        let bl = Math.ceil(b.length / GameRoom.BOARD_WIDTH);
-        if (l + bl > GameRoom.BOARD_HEIGHT)
-            l = GameRoom.BOARD_HEIGHT - bl;
-        for (var i = 0; i < l; i++) {
-            let line: ArraySchema<number> = new ArraySchema<number>();
-            for (var j = 0; j < GameRoom.BOARD_WIDTH; j++) {
-                line.push(Math.ceil(Math.random() * GameRoom.DICE_NUM));
+        if (this.state.players.get(c.sessionId)) {
+            let b = this.state.players.get(c.sessionId).board;
+            let bl = Math.ceil(b.length / GameRoom.BOARD_WIDTH);
+            if (l + bl > GameRoom.BOARD_HEIGHT)
+                l = GameRoom.BOARD_HEIGHT - bl;
+            for (var i = 0; i < l; i++) {
+                let line: ArraySchema<number> = new ArraySchema<number>();
+                for (var j = 0; j < GameRoom.BOARD_WIDTH; j++) {
+                    line.push(Math.ceil(Math.random() * GameRoom.DICE_NUM));
+                }
+                b = this.state.players.get(c.sessionId).board;
+                this.state.players.get(c.sessionId).board = line.concat(b.toJSON());
+                // for (var k = line.length-1; k >= 0; k--) {
+                //     this.state.players.get(c.sessionId).board.unshift(line[k]);
+                // }
             }
-            this.state.players.get(c.sessionId).board = line.concat(b.toJSON());
-            // for (var k = line.length-1; k >= 0; k--) {
-            //     this.state.players.get(c.sessionId).board.unshift(line[k]);
-            // }
-        }
-        if (Math.ceil(this.state.players.get(c.sessionId).board.length / GameRoom.BOARD_WIDTH)>=GameRoom.BOARD_HEIGHT) {
-            this.clock.stop();
-            this.clock.clear();
-            this.setState(new GameState());
-            this.state.players.forEach((p,k,m)=>{
-                p.ready = false;
-            })
+            if (Math.ceil(this.state.players.get(c.sessionId).board.length / GameRoom.BOARD_WIDTH) >= GameRoom.BOARD_HEIGHT) {
+                this.clock.clear();
+                this.clock.setTimeout(() => {
+                    for (var k = 0; k < this.clients.length; k++) {
+                        this.clients[k].leave(1000);
+                    }
+                }, GameRoom.WIN_TIMEOUT * 1000)
+
+            }
         }
     }
 
