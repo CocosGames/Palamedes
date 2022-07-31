@@ -48,7 +48,7 @@ function init(self)
 end
 
 function startGame()
-    cc.init(on_state_change, on_leave)
+    inited = true
     msg.post(p1.box, "disable")
     msg.post(p1.magicNum, "disable")
     msg.post(p1.magicLines, "disable")
@@ -61,7 +61,7 @@ function startGame()
     msg.post("/gui#game", "restart", { show = false })
     msg.post("/gui#game", "win", { show = false })
     msg.post(".", "acquire_input_focus")
-    inited = true
+    cc.init(on_state_change, on_leave)
 end
 
 function on_leave()
