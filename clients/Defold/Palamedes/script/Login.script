@@ -1,13 +1,8 @@
-
-
-local sum = 0
-local v = 0.2
-local block = 600
+local delay = 0
+local count = 0
 
 function init(self)
-	-- Add initialization code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
+    delay = math.random(0,5)
 end
 
 function final(self)
@@ -17,13 +12,18 @@ function final(self)
 end
 
 function update(self, dt)
-	local d = vmath.vector3(-v,-v,0)
-	sum = sum+v
-	go.set_position(go.get_position("/bg")+d,"/bg")
-	if sum >= 500 then
-		go.set_position(vmath.vector3(),"/bg")
-		sum = 0
-	end
+    count = count+dt
+    if count > delay then
+        count = 0
+        delay = math.random()*3+0.5
+        local pos = vmath.vector3(math.random()*960, math.random()*640, 0)
+        local star = factory.create("/factory#star", pos)
+        go.set_scale(0.1+math.random()*0.2, star)
+        s = 0.6+math.random()*0.4
+        go.animate(star, "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(s), go.EASING_OUTBACK, 1, 0,function()
+            go.delete(star)
+        end)
+    end
 end
 
 function fixed_update(self, dt)

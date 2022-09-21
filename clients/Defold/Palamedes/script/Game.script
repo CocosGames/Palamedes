@@ -203,7 +203,12 @@ function final(self)
     -- Remove this function if not needed
 end
 
+function update_delay()
+    print(cc.ping_count)
+end
+
 function update(self, dt)
+    --update_delay()
     if p1.shooting then
         local p1_box_pos = go.get_position(p1.box)
         local p1u = math.ceil((p1_box_pos.x - p1.startX) / box_size)

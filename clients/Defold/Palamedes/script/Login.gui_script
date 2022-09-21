@@ -3,6 +3,7 @@ local monarch = require "monarch.monarch"
 
 function init(self)
 	gooey.acquire_input()
+	gui.animate(gui.get_node("press_to_start"), gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_LINEAR, 3, 1, nil, gui.PLAYBACK_LOOP_PINGPONG)
 end
 
 local function on_game(button)
@@ -12,16 +13,17 @@ end
 local function on_logo(button)
 	if button.node_id == hash("defold_button") then
 		sys.open_url("http://www.defold.com/")
-	elseif button.node_id == hash("colyseus_button") then
-		sys.open_url("http://www.colyseus.io/")
 	elseif button.node_id == hash("arena_button") then
 		sys.open_url("https://www.colyseus.io/arena")
 	end
 end
 
 function on_input(self, action_id, action)
-	gooey.button("game_button", action_id, action, on_game)
-	gooey.button("defold_button", action_id, action, on_logo)
-	gooey.button("colyseus_button", action_id, action, on_logo)
-	gooey.button("arena_button", action_id, action, on_logo)
+	-- gooey.button("game_button", action_id, action, on_game)
+	-- gooey.button("defold_button", action_id, action, on_logo)
+	-- gooey.button("arena_button", action_id, action, on_logo)
+end
+
+function final(self)
+	gui.cancel_animation(gui.get_node("press_to_start"), gui.PROP_COLOR)
 end

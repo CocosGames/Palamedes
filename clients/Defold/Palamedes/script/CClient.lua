@@ -8,6 +8,7 @@ local room
 function M.init(osc, ol)
     client = ColyseusClient.new("ws://localhost:2567")
     --client = ColyseusClient.new("wss://azlmqb.colyseus.in")
+
     client:join_or_create("game", {}, function(err, _room)
         if err then
             print("JOIN ERROR: " .. err)
