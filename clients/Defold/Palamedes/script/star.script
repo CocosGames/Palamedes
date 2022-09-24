@@ -1,8 +1,14 @@
 local lr = 1
 local rot_amount = 300
 function init(self)
-	if math.random()<0.5 then lr = -1 end
-	rot_amount = math.random()*100+200
+	r = math.random();
+	if r > 0.5 then
+		lr = -1
+	else
+		lr = 1
+	end
+	rot_amount = math.random()*150+150
+	rot_amount = rot_amount*lr
 end
 
 function final(self)
@@ -13,7 +19,7 @@ end
 
 function update(self, dt)
 	local rot = go.get_rotation()
-	rot = rot * vmath.quat_rotation_z(math.rad(rot_amount*lr)*dt)
+	rot = rot * vmath.quat_rotation_z(math.rad(rot_amount)*dt)
 	go.set_rotation(rot)
 end
 

@@ -12,7 +12,7 @@ background_color {
 nodes {
   position {
     x: 468.0
-    y: 548.0
+    y: 461.0
     z: 0.0
     w: 1.0
   }
@@ -68,8 +68,8 @@ nodes {
 }
 nodes {
   position {
-    x: 807.0
-    y: 17.0
+    x: 24.0
+    y: 20.0
     z: 0.0
     w: 1.0
   }
@@ -80,8 +80,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 0.7
-    y: 0.7
+    x: 0.8
+    y: 0.8
     z: 1.0
     w: 1.0
   }
@@ -125,8 +125,8 @@ nodes {
 }
 nodes {
   position {
-    x: 892.0
-    y: 18.0
+    x: 116.0
+    y: 20.0
     z: 0.0
     w: 1.0
   }
@@ -137,8 +137,8 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 0.7
-    y: 0.74
+    x: 0.8
+    y: 0.85
     z: 1.0
     w: 1.0
   }
@@ -183,7 +183,7 @@ nodes {
 nodes {
   position {
     x: 470.0
-    y: 220.0
+    y: 264.0
     z: 0.0
     w: 1.0
   }
@@ -200,7 +200,7 @@ nodes {
     w: 1.0
   }
   size {
-    x: 511.0
+    x: 534.0
     y: 53.0
     z: 0.0
     w: 1.0
@@ -231,6 +231,63 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 0.0
+  template_node_child: false
+  size_mode: SIZE_MODE_AUTO
+  custom_type: 0
+  enabled: true
+  visible: true
+}
+nodes {
+  position {
+    x: 826.0
+    y: 22.0
+    z: 0.0
+    w: 1.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  size {
+    x: 259.0
+    y: 37.0
+    z: 0.0
+    w: 1.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  type: TYPE_BOX
+  blend_mode: BLEND_MODE_ALPHA
+  texture: "login/banner"
+  id: "banner"
+  xanchor: XANCHOR_NONE
+  yanchor: YANCHOR_NONE
+  pivot: PIVOT_CENTER
+  adjust_mode: ADJUST_MODE_FIT
+  layer: ""
+  inherit_alpha: true
+  slice9 {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.0
+  }
+  clipping_mode: CLIPPING_MODE_NONE
+  clipping_visible: true
+  clipping_inverted: false
+  alpha: 1.0
   template_node_child: false
   size_mode: SIZE_MODE_AUTO
   custom_type: 0

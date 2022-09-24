@@ -29,8 +29,8 @@ nodes {
     w: 1.0
   }
   size {
-    x: 770.0
-    y: 78.0
+    x: 810.0
+    y: 53.0
     z: 0.0
     w: 1.0
   }
@@ -63,6 +63,8 @@ nodes {
   template_node_child: false
   size_mode: SIZE_MODE_AUTO
   custom_type: 0
+  enabled: true
+  visible: true
 }
 nodes {
   position {
@@ -118,6 +120,8 @@ nodes {
   template_node_child: false
   size_mode: SIZE_MODE_AUTO
   custom_type: 0
+  enabled: true
+  visible: true
 }
 nodes {
   position {
@@ -173,6 +177,8 @@ nodes {
   template_node_child: false
   size_mode: SIZE_MODE_AUTO
   custom_type: 0
+  enabled: true
+  visible: true
 }
 nodes {
   position {
@@ -228,6 +234,8 @@ nodes {
   template_node_child: false
   size_mode: SIZE_MODE_AUTO
   custom_type: 0
+  enabled: true
+  visible: true
 }
 nodes {
   position {
@@ -283,6 +291,8 @@ nodes {
   template_node_child: false
   size_mode: SIZE_MODE_AUTO
   custom_type: 0
+  enabled: true
+  visible: true
 }
 nodes {
   position {
@@ -338,6 +348,8 @@ nodes {
   template_node_child: false
   size_mode: SIZE_MODE_AUTO
   custom_type: 0
+  enabled: true
+  visible: true
 }
 nodes {
   position {
@@ -393,6 +405,8 @@ nodes {
   template_node_child: false
   size_mode: SIZE_MODE_AUTO
   custom_type: 0
+  enabled: true
+  visible: true
 }
 material: "/builtins/materials/gui.material"
 adjust_reference: ADJUST_REFERENCE_PARENT

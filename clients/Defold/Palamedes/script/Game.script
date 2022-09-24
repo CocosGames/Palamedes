@@ -1,4 +1,5 @@
 local cc = require "script/CClient"
+local monarch = require "monarch.monarch"
 
 local box_size = 46
 local box_z = 0.3
@@ -25,6 +26,7 @@ p1.board = {}
 p1.history = {}
 p1.shooting = false
 p1.moving = false
+p1.delay = 0
 
 local p2 = {}
 p2.id = 2
@@ -42,6 +44,7 @@ p2.board = {}
 p2.history = {}
 p2.shooting = false
 p2.moving = false
+p2.delay = 0
 
 function init(self)
     startGame()
@@ -86,6 +89,7 @@ function on_state_change(state)
         update_magic(whichOne(k), v.magic)
         update_dice(whichOne(k), v.dice)
         update_pos(whichOne(k), v.pos)
+        --update_delay(whichOne(k), v.delay)
     end
     if gaming == false then
         if p1.ready and p2.ready then
@@ -105,6 +109,10 @@ function whichOne(id)
         p = p2
     end
     return p
+end
+
+function update_delay(p, delay)
+    print(p.id..":"..delay)
 end
 
 function update_ready(p, ready)
@@ -283,7 +291,9 @@ function on_message(self, message_id, message, sender)
         end
     elseif not inited then
         if message.action_id == hash("roll") or message.tap then
-            startGame()
+            --startGame()
+
+            monarch.show("login_scene")
         end
     end
 end

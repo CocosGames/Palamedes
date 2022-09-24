@@ -6,9 +6,10 @@ local client
 local room
 
 function M.init(osc, ol)
-    client = ColyseusClient.new("ws://localhost:2567")
-    --client = ColyseusClient.new("wss://azlmqb.colyseus.in")
-
+    if client == nil then
+        --client = ColyseusClient.new("ws://localhost:2567")
+        client = ColyseusClient.new("wss://cauyc1.colyseus.de")
+    end
     client:join_or_create("game", {}, function(err, _room)
         if err then
             print("JOIN ERROR: " .. err)
@@ -26,6 +27,10 @@ function M.send(type, data)
     if room ~= nil then
         room:send(type, data)
     end
+end
+
+function M.close()
+
 end
 
 return M

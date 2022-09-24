@@ -1,6 +1,7 @@
 import {Room, Client} from "colyseus";
 import {GameState, Player} from "./schema/GameState";
 import {ArraySchema, MapSchema} from "@colyseus/schema";
+import ArenaConfig from "../arena.config";
 
 export class GameRoom extends Room<GameState> {
 
@@ -238,6 +239,8 @@ export class GameRoom extends Room<GameState> {
                 this.clients.forEach((c, i, a) => {
                     this.addLines(c);
                 });
+                // this.state.players.get(this.clients[0].sessionId).delay = this.clients[0].pingCount * 3000;
+                // this.state.players.get(this.clients[1].sessionId).delay = this.clients[1].pingCount * 3000;
             }, GameRoom.DROP_TIMEOUT * 1000);
         }
     }
