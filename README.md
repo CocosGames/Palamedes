@@ -1,6 +1,6 @@
 # Palamedes Online
 
-https://www.youtube.com/watch?v=dlKRhjqefPU
+https://youtu.be/QwrIExVUwdI
 
 https://forum.defold.com/t/palamedes-online/71266
 
